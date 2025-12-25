@@ -1,10 +1,13 @@
 import { NextResponse } from 'next/server';
 
 // Force dynamic rendering - don't pre-render at build time
+// These configs prevent Next.js from evaluating this route during build
 export const dynamic = 'force-dynamic';
-export const runtime = 'nodejs';
+export const dynamicParams = true;
 export const revalidate = 0;
 export const fetchCache = 'force-no-store';
+export const runtime = 'nodejs';
+export const preferredRegion = 'auto';
 
 export async function GET() {
   try {
