@@ -5,13 +5,29 @@ import {
   fetchExpenseDataFromCSV, 
   fetchBudgetDataFromCSV, 
   fetchCashFlowDataFromCSV 
-} from '@/lib/csv-reader';
+} from '@/lib/data-loader';
 
 // Force dynamic rendering - don't pre-render at build time
 export const dynamic = 'force-dynamic';
 export const runtime = 'nodejs'; // Ensure this runs only on Node.js server
+export const revalidate = 0; // No caching
 
 export async function GET() {
+  // Skip execution during build phase - return empty data
+  if (process.env.NEXT_PHASE === 'phase-production-build') {
+    return NextResponse.json({
+      income: [],
+      expenses: [],
+      budget: [],
+      cashFlow: [],
+      summary: {
+        totalIncome: 0,
+        totalExpenses: 0,
+        currentBalance: 0,
+      },
+    });
+  }
+
   try {
     // Read data from CSV files in dummy-data folder
     const [income, expenses, budget, cashFlow] = await Promise.all([
