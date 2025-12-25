@@ -60,13 +60,25 @@ export async function GET() {
       },
     });
   } catch (error) {
-    console.error('Error fetching financial data from CSV:', error);
+    // During build, return empty data instead of error
+    if (process.env.NEXT_PHASE === 'phase-production-build' || 
+        process.env.NEXT_PHASE === 'phase-development-build') {
+      return NextResponse.json({
+        income: [],
+        expenses: [],
+        budget: [],
+        cashFlow: [],
+        summary: { totalIncome: 0, totalExpenses: 0, currentBalance: 0 },
+      });
+    }
+    
+    console.error('Error fetching financial data:', error);
     const errorMessage = error instanceof Error ? error.message : 'Unknown error';
     
     return NextResponse.json(
       { 
         error: 'Failed to fetch financial data', 
-        details: `Error reading CSV files: ${errorMessage}\n\nMake sure CSV files exist in the dummy-data folder.`,
+        details: `Error loading data: ${errorMessage}`,
         technicalError: errorMessage
       },
       { status: 500 }
