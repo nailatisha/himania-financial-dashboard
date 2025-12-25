@@ -34,127 +34,154 @@ function parseCSV(csvContent: string): string[][] {
  * Read CSV file from dummy-data folder
  */
 function readCSVFile(filename: string): string[][] {
-  const filePath = path.join(process.cwd(), 'dummy-data', filename);
-  const fileContent = fs.readFileSync(filePath, 'utf-8');
-  return parseCSV(fileContent);
+  try {
+    const filePath = path.join(process.cwd(), 'dummy-data', filename);
+    
+    // Check if file exists
+    if (!fs.existsSync(filePath)) {
+      console.warn(`CSV file not found: ${filePath}`);
+      return [];
+    }
+    
+    const fileContent = fs.readFileSync(filePath, 'utf-8');
+    return parseCSV(fileContent);
+  } catch (error) {
+    console.error(`Error reading CSV file ${filename}:`, error);
+    return [];
+  }
 }
 
 /**
  * Fetch income data from CSV
  */
 export function fetchIncomeDataFromCSV(): IncomeEntry[] {
-  const rows = readCSVFile('income.csv');
-  
-  if (rows.length === 0) return [];
-  
-  const headers = rows[0].map(h => h.trim());
-  const dataRows = rows.slice(1);
-  
-  return dataRows
-    .map(row => {
-      // Pad row to match header length
-      while (row.length < headers.length) {
-        row.push('');
-      }
-      
-      const getValue = (colName: string) => {
-        const index = headers.indexOf(colName);
-        return index >= 0 ? row[index]?.trim() : '';
-      };
+  try {
+    const rows = readCSVFile('income.csv');
+    
+    if (rows.length === 0) return [];
+    
+    const headers = rows[0].map(h => h.trim());
+    const dataRows = rows.slice(1);
+    
+    return dataRows
+      .map(row => {
+        // Pad row to match header length
+        while (row.length < headers.length) {
+          row.push('');
+        }
+        
+        const getValue = (colName: string) => {
+          const index = headers.indexOf(colName);
+          return index >= 0 ? row[index]?.trim() : '';
+        };
 
-      const date = getValue('Date');
-      const amount = getValue('Amount (IDR)');
-      
-      if (!date || !amount) return null;
+        const date = getValue('Date');
+        const amount = getValue('Amount (IDR)');
+        
+        if (!date || !amount) return null;
 
-      return {
-        date,
-        sourceOfIncome: getValue('Source of Income'),
-        description: getValue('Description'),
-        amount: parseFloat(amount.replace(/[^\d.-]/g, '')) || 0,
-        programDivision: getValue('Program / Division'),
-      };
-    })
-    .filter((item): item is IncomeEntry => item !== null);
+        return {
+          date,
+          sourceOfIncome: getValue('Source of Income'),
+          description: getValue('Description'),
+          amount: parseFloat(amount.replace(/[^\d.-]/g, '')) || 0,
+          programDivision: getValue('Program / Division'),
+        };
+      })
+      .filter((item): item is IncomeEntry => item !== null);
+  } catch (error) {
+    console.error('Error fetching income data:', error);
+    return [];
+  }
 }
 
 /**
  * Fetch expense data from CSV
  */
 export function fetchExpenseDataFromCSV(): ExpenseEntry[] {
-  const rows = readCSVFile('expenses.csv');
-  
-  if (rows.length === 0) return [];
-  
-  const headers = rows[0].map(h => h.trim());
-  const dataRows = rows.slice(1);
-  
-  return dataRows
-    .map(row => {
-      while (row.length < headers.length) {
-        row.push('');
-      }
-      
-      const getValue = (colName: string) => {
-        const index = headers.indexOf(colName);
-        return index >= 0 ? row[index]?.trim() : '';
-      };
+  try {
+    const rows = readCSVFile('expenses.csv');
+    
+    if (rows.length === 0) return [];
+    
+    const headers = rows[0].map(h => h.trim());
+    const dataRows = rows.slice(1);
+    
+    return dataRows
+      .map(row => {
+        while (row.length < headers.length) {
+          row.push('');
+        }
+        
+        const getValue = (colName: string) => {
+          const index = headers.indexOf(colName);
+          return index >= 0 ? row[index]?.trim() : '';
+        };
 
-      const date = getValue('Date');
-      const amount = getValue('Amount (IDR)');
-      
-      if (!date || !amount) return null;
+        const date = getValue('Date');
+        const amount = getValue('Amount (IDR)');
+        
+        if (!date || !amount) return null;
 
-      return {
-        date,
-        expenseCategory: getValue('Expense Category'),
-        description: getValue('Description'),
-        amount: parseFloat(amount.replace(/[^\d.-]/g, '')) || 0,
-        programDivision: getValue('Program / Division'),
-      };
-    })
-    .filter((item): item is ExpenseEntry => item !== null);
+        return {
+          date,
+          expenseCategory: getValue('Expense Category'),
+          description: getValue('Description'),
+          amount: parseFloat(amount.replace(/[^\d.-]/g, '')) || 0,
+          programDivision: getValue('Program / Division'),
+        };
+      })
+      .filter((item): item is ExpenseEntry => item !== null);
+  } catch (error) {
+    console.error('Error fetching expense data:', error);
+    return [];
+  }
 }
 
 /**
  * Fetch budget allocation data from CSV
  */
 export function fetchBudgetDataFromCSV(): BudgetAllocation[] {
-  const rows = readCSVFile('budget-allocation.csv');
-  
-  if (rows.length === 0) return [];
-  
-  const headers = rows[0].map(h => h.trim());
-  const dataRows = rows.slice(1);
-  
-  return dataRows
-    .map(row => {
-      while (row.length < headers.length) {
-        row.push('');
-      }
-      
-      const getValue = (colName: string) => {
-        const index = headers.indexOf(colName);
-        return index >= 0 ? row[index]?.trim() : '';
-      };
+  try {
+    const rows = readCSVFile('budget-allocation.csv');
+    
+    if (rows.length === 0) return [];
+    
+    const headers = rows[0].map(h => h.trim());
+    const dataRows = rows.slice(1);
+    
+    return dataRows
+      .map(row => {
+        while (row.length < headers.length) {
+          row.push('');
+        }
+        
+        const getValue = (colName: string) => {
+          const index = headers.indexOf(colName);
+          return index >= 0 ? row[index]?.trim() : '';
+        };
 
-      const programDivision = getValue('Program / Division');
-      const approved = getValue('Approved Budget (IDR)');
-      
-      if (!programDivision || !approved) return null;
+        const programDivision = getValue('Program / Division');
+        const approved = getValue('Approved Budget (IDR)');
+        
+        if (!programDivision || !approved) return null;
 
-      const approvedBudget = parseFloat(approved.replace(/[^\d.-]/g, '')) || 0;
-      const usedBudget = parseFloat(getValue('Used Budget (IDR)').replace(/[^\d.-]/g, '')) || 0;
-      const remainingBudget = parseFloat(getValue('Remaining Budget (IDR)').replace(/[^\d.-]/g, '')) || 0;
+        const approvedBudget = parseFloat(approved.replace(/[^\d.-]/g, '')) || 0;
+        const usedBudget = parseFloat(getValue('Used Budget (IDR)').replace(/[^\d.-]/g, '')) || 0;
+        const remainingBudget = parseFloat(getValue('Remaining Budget (IDR)').replace(/[^\d.-]/g, '')) || 0;
 
-      return {
-        programDivision,
-        approvedBudget,
-        usedBudget,
-        remainingBudget,
-      };
-    })
-    .filter((item): item is BudgetAllocation => item !== null);
+        return {
+          programDivision,
+          approvedBudget,
+          usedBudget,
+          remainingBudget,
+        };
+      })
+      .filter((item): item is BudgetAllocation => item !== null);
+  } catch (error) {
+    console.error('Error fetching budget data:', error);
+    return [];
+  }
 }
 
 /**

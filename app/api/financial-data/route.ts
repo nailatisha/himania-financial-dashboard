@@ -7,8 +7,9 @@ import {
   fetchCashFlowDataFromCSV 
 } from '@/lib/csv-reader';
 
+// Force dynamic rendering - don't pre-render at build time
 export const dynamic = 'force-dynamic';
-// No auto-revalidation - data is static from CSV files
+export const runtime = 'nodejs'; // Ensure this runs only on Node.js server
 
 export async function GET() {
   try {
