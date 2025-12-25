@@ -1,41 +1,24 @@
 import { NextResponse } from 'next/server';
-// Using CSV reader for prototype (no Google Sheets API needed)
+// Using static data for prototype (no file system access needed)
 import { 
-  fetchIncomeDataFromCSV, 
-  fetchExpenseDataFromCSV, 
-  fetchBudgetDataFromCSV, 
-  fetchCashFlowDataFromCSV 
-} from '@/lib/data-loader';
+  incomeData, 
+  expenseData, 
+  budgetData, 
+  cashFlowData 
+} from '@/lib/dummy-data';
 
 // Force dynamic rendering - don't pre-render at build time
 export const dynamic = 'force-dynamic';
-export const runtime = 'nodejs'; // Ensure this runs only on Node.js server
-export const revalidate = 0; // No caching
+export const runtime = 'nodejs';
+export const revalidate = 0;
 
 export async function GET() {
-  // Skip execution during build phase - return empty data
-  if (process.env.NEXT_PHASE === 'phase-production-build') {
-    return NextResponse.json({
-      income: [],
-      expenses: [],
-      budget: [],
-      cashFlow: [],
-      summary: {
-        totalIncome: 0,
-        totalExpenses: 0,
-        currentBalance: 0,
-      },
-    });
-  }
-
   try {
-    // Read data from CSV files in dummy-data folder
-    const [income, expenses, budget, cashFlow] = await Promise.all([
-      fetchIncomeDataFromCSV(),
-      fetchExpenseDataFromCSV(),
-      fetchBudgetDataFromCSV(),
-      fetchCashFlowDataFromCSV(),
-    ]);
+    // Use static data - no file system access needed
+    const income = incomeData;
+    const expenses = expenseData;
+    const budget = budgetData;
+    const cashFlow = cashFlowData;
 
     const totalIncome = income.reduce((sum, entry) => sum + entry.amount, 0);
     const totalExpenses = expenses.reduce((sum, entry) => sum + entry.amount, 0);
