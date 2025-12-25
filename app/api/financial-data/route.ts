@@ -1,19 +1,21 @@
 import { NextResponse } from 'next/server';
-// Using static data for prototype (no file system access needed)
-import { 
-  incomeData, 
-  expenseData, 
-  budgetData, 
-  cashFlowData 
-} from '@/lib/dummy-data';
 
 // Force dynamic rendering - don't pre-render at build time
 export const dynamic = 'force-dynamic';
 export const runtime = 'nodejs';
 export const revalidate = 0;
+export const fetchCache = 'force-no-store';
 
 export async function GET() {
   try {
+    // Dynamic import to avoid evaluation during build
+    const { 
+      incomeData, 
+      expenseData, 
+      budgetData, 
+      cashFlowData 
+    } = await import('@/lib/dummy-data');
+    
     // Use static data - no file system access needed
     const income = incomeData;
     const expenses = expenseData;
