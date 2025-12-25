@@ -9,21 +9,40 @@ export const fetchCache = 'force-no-store';
 export const runtime = 'nodejs';
 export const preferredRegion = 'auto';
 
+// Lazy load data function to prevent build-time evaluation
+async function getFinancialData() {
+  const { 
+    incomeData, 
+    expenseData, 
+    budgetData, 
+    cashFlowData 
+  } = await import('@/lib/dummy-data');
+  
+  return {
+    income: incomeData,
+    expenses: expenseData,
+    budget: budgetData,
+    cashFlow: cashFlowData,
+  };
+}
+
 export async function GET() {
+  // Early return during build phase to prevent evaluation
+  if (process.env.NEXT_PHASE === 'phase-production-build' || 
+      process.env.NEXT_PHASE === 'phase-development-build' ||
+      process.env.NODE_ENV === 'production' && !process.env.VERCEL && !process.env.NETLIFY) {
+    return NextResponse.json({
+      income: [],
+      expenses: [],
+      budget: [],
+      cashFlow: [],
+      summary: { totalIncome: 0, totalExpenses: 0, currentBalance: 0 },
+    });
+  }
+
   try {
-    // Dynamic import to avoid evaluation during build
-    const { 
-      incomeData, 
-      expenseData, 
-      budgetData, 
-      cashFlowData 
-    } = await import('@/lib/dummy-data');
-    
-    // Use static data - no file system access needed
-    const income = incomeData;
-    const expenses = expenseData;
-    const budget = budgetData;
-    const cashFlow = cashFlowData;
+    // Lazy load data only at runtime
+    const { income, expenses, budget, cashFlow } = await getFinancialData();
 
     const totalIncome = income.reduce((sum, entry) => sum + entry.amount, 0);
     const totalExpenses = expenses.reduce((sum, entry) => sum + entry.amount, 0);
